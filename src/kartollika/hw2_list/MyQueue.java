@@ -107,4 +107,9 @@ public class MyQueue implements Queue<Object> {
     public Object peek() {
         return queue.get(0);
     }
+
+    @Override
+    public String toString() {
+        return queue.toString();
+    }
 }
