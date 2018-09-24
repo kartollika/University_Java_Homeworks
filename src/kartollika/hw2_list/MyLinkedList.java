@@ -10,14 +10,6 @@ public class MyLinkedList implements List<Object> {
     private Node first;
     private int size;
 
-    public static void main(String[] args) {
-        MyLinkedList myLinkedList = new MyLinkedList();
-
-        myLinkedList.add(2);
-        myLinkedList.add("dfag");
-        myLinkedList.remove(0);
-    }
-
     @Override
     public int size() {
         return size;
@@ -34,9 +26,9 @@ public class MyLinkedList implements List<Object> {
             return false;
         }
 
-        Node curNode = first;
-        while (curNode.next != null) {
-            if (curNode.content.equals(o)) {
+        Iterator listIterator = getIterator();
+        while (listIterator.hasNext()) {
+            if (listIterator.next().equals(o)) {
                 return true;
             }
         }
@@ -86,12 +78,15 @@ public class MyLinkedList implements List<Object> {
         if (size == 0) {
             return false;
         }
-        Node curNode = first;
-        while (curNode.next != null) {
-            curNode = curNode.next;
+
+        for (int i = 0; i < size; ++i) {
+            if (get(i).equals(o)) {
+                remove(i);
+                return true;
+            }
         }
-        size--;
-        return true;
+
+        return false;
     }
 
     @Override
@@ -128,9 +123,7 @@ public class MyLinkedList implements List<Object> {
 
     @Override
     public Object get(int index) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bound: index: " + index + " size: " + size);
-        }
+        checkIndexInBounds(index);
         Node curNode = first;
         for (int i = 0; i < index; ++i) {
             curNode = curNode.next;
@@ -140,14 +133,13 @@ public class MyLinkedList implements List<Object> {
 
     @Override
     public Object set(int index, Object element) {
+        checkIndexInBounds(index);
         throw new UnsupportedOperationException("Unsupported");
     }
 
     @Override
     public void add(int index, Object element) {
-        if (index >= size) {
-            throw new IndexOutOfBoundsException("Index out of bound: index: " + index + " size: " + size);
-        }
+        checkIndexInBounds(index);
 
         Node curNode = first;
         for (int i = 0; i < index; ++i) {
@@ -169,18 +161,15 @@ public class MyLinkedList implements List<Object> {
         next.previous = curNode;
     }
 
-    @Override
-    public Object remove(int index) {
-        if (size == 0) {
+    private void checkIndexInBounds(int index) {
+        if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index out of bound: index: " + index + " size: " + size);
         }
+    }
 
-        if (size == 1) {
-            Object content = first.content;
-            first = null;
-            size--;
-            return content;
-        }
+    @Override
+    public Object remove(int index) {
+        checkIndexInBounds(index);
 
         Node curNode = first;
         for (int i = 0; i < index; ++i) {
@@ -190,6 +179,12 @@ public class MyLinkedList implements List<Object> {
         Node prev = curNode.previous;
         Node next = curNode.next;
         Object content = curNode.content;
+
+        if (prev == null && next == null) {
+            first = null;
+            size--;
+            return content;
+        }
 
         if (prev == null) {
             first = next;
@@ -220,7 +215,7 @@ public class MyLinkedList implements List<Object> {
         throw new UnsupportedOperationException("Unsupported");
     }
 
-    public Iterator<Object> getIterator() {
+    Iterator<Object> getIterator() {
         return new Iterator<>() {
 
             Node curNode = first;
@@ -255,23 +250,24 @@ public class MyLinkedList implements List<Object> {
         throw new UnsupportedOperationException("Unsupported");
     }
 
-    /*@Override
+    @Override
     public String toString() {
         if (size == 0) {
             return "Empty list";
         }
         Node curNode = first;
         StringBuilder stringBuilder = new StringBuilder();
-        while (curNode.next != null) {
+        while (curNode != null) {
             stringBuilder.append(curNode.content).append(" ");
+            curNode = curNode.next;
         }
         return stringBuilder.toString();
-    }*/
+    }
 
     private class Node {
-        Object content;
-        Node previous;
-        Node next;
+        private Object content;
+        private Node previous;
+        private Node next;
 
         Node(Object content, Node previous, Node next) {
             this.content = content;
