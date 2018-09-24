@@ -6,7 +6,7 @@ public class Client {
 
     private int cashTotal;
 
-    Client() {
+    public Client() {
         cashTotal = 0;
     }
 
@@ -14,7 +14,7 @@ public class Client {
         this.cashTotal = cashTotal;
     }
 
-    Set<String> requestCashVariants(ATM atm, int amount) {
+    public Set<String> requestCashVariants(ATM atm, int amount) {
         return atm.getVariantsOfOutput(amount);
     }
 

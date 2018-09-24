@@ -59,7 +59,7 @@ public class ATM implements CashOutput {
         return new int[0];
     }
 
-    void setPapers(Integer[] papers) {
+    public void setPapers(Integer[] papers) {
         this.papers = papers;
         Arrays.sort(papers, new Comparator<>() {
             @Override
