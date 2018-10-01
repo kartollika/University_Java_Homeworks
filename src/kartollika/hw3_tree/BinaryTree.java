@@ -1,57 +1,69 @@
 package kartollika.hw3_tree;
 
-public class BinaryTree<T extends Comparable<T>> {
+public class BinaryTree<K extends Comparable<K>, V> {
 
     private Node root;
-
-    public static void main(String[] args) {
-        BinaryTree<Integer> binaryTree = new BinaryTree<>();
-        binaryTree.add(1);
-        binaryTree.add(2);
-        binaryTree.add(3);
-        binaryTree.add(4);
-        binaryTree.add(-2);
-        binaryTree.add(-3);
-        binaryTree.add(-1);
-        binaryTree.add(0);
-        binaryTree.remove(-2);
-        System.out.println(binaryTree.contains(-1));
-    }
 
     public boolean isEmpty() {
         return root == null;
     }
 
-    public void add(T value) {
-        root = addNodeRecursive(root, value);
+    public V add(K key, V value) {
+        V oldValue = getNodeValue(key);
+        root = addNodeRecursive(root, key, value);
+        return oldValue;
     }
 
-    private Node addNodeRecursive(Node node, T value) {
+    private Node addNodeRecursive(Node node, K key, V value) {
         if (node == null) {
-            return new Node(value);
+            return new Node(key, value);
         }
 
-        int valuesCompared = value.compareTo(node.getValue());
+        int valuesCompared = key.compareTo(node.getKey());
         if (valuesCompared < 0) {
-            node.setLeftChild(addNodeRecursive(node.getLeftChild(), value));
+            node.setLeftChild(addNodeRecursive(node.getLeftChild(), key, value));
         } else if (valuesCompared > 0) {
-            node.setRightChild(addNodeRecursive(node.getRightChild(), value));
+            node.setRightChild(addNodeRecursive(node.getRightChild(), key, value));
         } else {
+            node.setValue(value);
             return node;
         }
 
         return node;
     }
 
-
-    public void remove(T value) {
-        root = removeRecursive(root, value);
+    public V getNodeValue(K key) {
+        Node found = getNodeValueRecursive(root, key);
+        if (found == null) {
+            return null;
+        }
+        return found.getValue();
     }
 
-    private Node removeRecursive(Node node, T value) {
+    public Node getNodeValueRecursive(Node node, K key) {
+        if (node == null) {
+            return null;
+        }
+
+        int compareResult = key.compareTo(node.getKey());
+        if (compareResult == 0) {
+            return node;
+        }
+        if (compareResult < 0) {
+            return getNodeValueRecursive(node.getLeftChild(), key);
+        }
+
+        return getNodeValueRecursive(node.getRightChild(), key);
+    }
+
+    public void remove(K key) {
+        root = removeRecursive(root, key);
+    }
+
+    private Node removeRecursive(Node node, K key) {
         if (node == null) return null;
 
-        int valuesCompared = value.compareTo(node.getValue());
+        int valuesCompared = key.compareTo(node.getKey());
         if (valuesCompared == 0) {
             if (node.getLeftChild() == null && node.getRightChild() == null) {
                 return null;
@@ -65,81 +77,115 @@ public class BinaryTree<T extends Comparable<T>> {
                 return node.getLeftChild();
             }
 
-            Node target = findBiggestInLeftTree(node.getRightChild());
+            Node target = findSmallestInTree(node.getRightChild());
             node.setValue(target.getValue());
-            node.setLeftChild(removeRecursive(node.getLeftChild(), target.getValue()));
-
+            node.setKey(target.getKey());
+            node.setRightChild(removeRecursive(node.getRightChild(), target.getKey()));
         }
 
         if (valuesCompared < 0) {
-            node.setLeftChild(removeRecursive(node.getLeftChild(), value));
+            node.setLeftChild(removeRecursive(node.getLeftChild(), key));
             return node;
         }
 
-        node.setRightChild(removeRecursive(node.getRightChild(), value));
+        node.setRightChild(removeRecursive(node.getRightChild(), key));
         return node;
     }
 
-    private Node findBiggestInLeftTree(Node node) {
+    private Node findSmallestInTree(Node node) {
         if (node.getLeftChild() == null) {
             return node;
         } else {
-            return findBiggestInLeftTree(node.getLeftChild());
+            return findSmallestInTree(node.getLeftChild());
         }
     }
 
-    public boolean contains(T value) {
-        return containsRecursive(root, value);
+    public boolean contains(K key) {
+        return containsRecursive(root, key);
     }
 
-    private boolean containsRecursive(Node node, T value) {
+    private boolean containsRecursive(Node node, K key) {
         if (node == null) {
             return false;
         }
 
-        int valuesCompared = value.compareTo(node.getValue());
+        int valuesCompared = key.compareTo(node.getKey());
         if (valuesCompared < 0) {
-            return containsRecursive(node.getLeftChild(), value);
+            return containsRecursive(node.getLeftChild(), key);
         } else if (valuesCompared > 0) {
-            return containsRecursive(node.getRightChild(), value);
+            return containsRecursive(node.getRightChild(), key);
         } else {
             return true;
         }
     }
 
+    private String passLNR(StringBuilder stringBuilder, Node curNode) {
+        if (curNode.getLeftChild() != null) {
+            passLNR(stringBuilder, curNode.getLeftChild());
+        }
+
+        stringBuilder.append(curNode).append(" ");
+
+        if (curNode.getRightChild() != null) {
+            passLNR(stringBuilder, curNode.getRightChild());
+        }
+
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        return passLNR(new StringBuilder(), root);
+    }
+
     private class Node {
-        private T value;
+        private K key;
+        private V value;
         private Node leftChild;
         private Node rightChild;
 
-        Node(T value) {
+        private Node(K key, V value) {
+            this.key = key;
             this.value = value;
             this.leftChild = null;
             this.rightChild = null;
         }
 
-        T getValue() {
+        private K getKey() {
+            return key;
+        }
+
+        private void setKey(K key) {
+            this.key = key;
+        }
+
+        private V getValue() {
             return value;
         }
 
-        void setValue(T value) {
+        private void setValue(V value) {
             this.value = value;
         }
 
-        Node getLeftChild() {
+        private Node getLeftChild() {
             return leftChild;
         }
 
-        void setLeftChild(Node leftChild) {
+        private void setLeftChild(Node leftChild) {
             this.leftChild = leftChild;
         }
 
-        Node getRightChild() {
+        private Node getRightChild() {
             return rightChild;
         }
 
-        void setRightChild(Node rightChild) {
+        private void setRightChild(Node rightChild) {
             this.rightChild = rightChild;
+        }
+
+        @Override
+        public String toString() {
+            return value.toString();
         }
     }
 }
