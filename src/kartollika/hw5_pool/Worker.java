@@ -5,15 +5,10 @@ import java.util.Random;
 
 public class Worker<T> extends Thread {
 
-    private static int ID = 0;
-
-    private int workerId;
     private ResourcePool<T> resourcePool;
 
     Worker(ResourcePool<T> resourcePool) {
         this.resourcePool = resourcePool;
-        workerId = ID;
-        ID++;
     }
 
     @Override
